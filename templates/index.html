@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> <!-- Menambahkan font pixel -->
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='images/background index.gif') }}");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .welcome-container {
+            text-align: center;
+            border: 10px solid rgba(0, 0, 0, 0.5); 
+            padding: 40px; /* Menambahkan padding untuk memperbesar bingkai */
+            border-radius: 10px; 
+            background-color: rgba(18, 18, 18, 0.833); /* Latar belakang bingkai */
+        }
+
+        .welcome-text {
+    font-size: 1.2rem;
+    font-weight: bold; 
+    color: #FFFFFF; /* Mengubah warna teks menjadi putih */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Mengurangi intensitas bayangan */
+    opacity: 0;
+    animation: fade-in 4s ease-in-out forwards;
+    font-family: 'Press Start 2P', cursive; 
+}
+
+        .btn {
+            font-family: 'Press Start 2P', cursive; 
+            margin: 10px; /* Jarak antar tombol */
+        }
+
+        @keyframes fade-in {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-container">
+        <h2 class="welcome-text">Welcome to PixGraf</h2>
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+        <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+    </div>
+</body>
+</html>

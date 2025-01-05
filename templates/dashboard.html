@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-image: url("{{ url_for('static', filename='images/Shovel Knight.gif') }}");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 200px;
+            background-color: #292b29; /* Warna hijau neon untuk sidebar */
+            padding-top: 50px;
+        }
+
+        .main-content {
+            margin-left: 200px;
+            padding: 20px;
+        }
+        
+        .container-custom {
+            margin-top: 30px;
+        }
+        .section-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 5px solid #292b29; /* Warna hijau neon untuk border */
+            border-image: url('https://i.imgur.com/8Z5Z5Z5.png') 30 stretch; /* Gambar border pixel */
+            border-radius: 10px;
+            background-color: rgba(249, 249, 249, 0.8); /* Warna putih dengan 80% opasitas */
+            transition: background-color 0.3s; /* Animasi untuk perubahan transparansi */
+        }
+        .section-header {
+            color: #060606;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        .section-content {
+            margin-top: 20px;
+        }
+        .form-group, textarea, input[type="text"] {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        a.btn-danger {
+            margin-top: 20px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #292b29; /* Warna hijau neon untuk tombol */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #292b29; /* Warna hijau lebih gelap saat hover */
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result-text {
+            font-size: 1.1em;
+        }
+        a.btn-danger {
+            margin-top: 20px;
+        }
+
+        /* Tambahan CSS untuk mengubah tampilan 'Options' */
+        .sidebar h2 {
+            color: white; /* Mengubah warna menjadi putih */
+            font-size: 1.2em; /* Mengubah ukuran font menjadi sedikit lebih kecil */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Options</h2>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" id="file-tab" data-toggle="tab" href="#file" role="tab" aria-controls="file" aria-selected="true">File Management</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="text-tab" data-toggle="tab" href="#text" role="tab" aria-controls="text" aria-selected="false">Text Encryption</a>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content">
+        <div class="container mt-5 container-custom">
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+
+            <!-- Tab content -->
+            <div class="tab-content" id="myTabContent">
+                <!-- File Management Section -->
+                <div class="tab-pane fade show active" id="file" role="tabpanel" aria-labelledby="file-tab">
+                    <div class="section-container">
+                        <h3 class="section-header">File Management</h3>
+                        <div class="section-content">
+                            <!-- Upload File Form -->
+                            <h4>Upload File</h4>
+                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('dashboard') }}">
+                                {{ file_form.hidden_tag() }}
+                                <div class="form-group">
+                                    {{ file_form.file.label(class="form-label") }}
+                                    {{ file_form.file(class="form-control") }}
+                                </div>
+                                <div class="form-group">
+                                    {{ file_form.key.label(class="form-label") }}
+                                    {{ file_form.key(class="form-control") }} <!-- Input untuk kunci -->
+                                </div>
+                                <div class="form-group">
+                                    {{ file_form.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+
+                            <!-- Uploaded Files List -->
+                            <h4>Your Encrypted Files</h4>
+                            <ul class="list-group">
+                                {% for filename in uploaded_files %}
+                                    <li class="list-group-item">
+                                        {{ filename }}
+                                        <div>
+                                            <a href="{{ url_for('download_file', filename=filename) }}" class="btn btn-success btn-sm">Download</a>
+                                            <form method="POST" action="{{ url_for('delete_file', filename=filename) }}" style="display:inline;">
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+
+                            <!-- Decrypt File Form -->
+                            <h4>Decrypt File</h4>
+                            <form method="POST" action="{{ url_for('dashboard') }}">
+                                {{ decrypt_form.hidden_tag() }}
+                                <div class="form-group">
+                                    {{ decrypt_form.file_name.label(class="form-label") }}
+                                    {{ decrypt_form.file_name(class="form-control") }}
+                                </div>
+                                <div class="form-group">
+                                    {{ decrypt_form.key.label(class="form-label") }}
+                                    {{ decrypt_form.key(class="form-control") }}
+                                </div>
+                                <div class="form-group">
+                                    {{ decrypt_form.submit(class="btn btn-primary") }}
+                                </div>
+                            </form>
+
+                            {% if decrypted_file_path %}
+                                <h4>Decrypted File:</h4>
+                                <a href="{{ url_for('download_file', filename=decrypted_file_path) }}">Download Decrypted File</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text Encryption Section -->
+                <div class="tab-pane fade" id="text" role="tabpanel" aria-labelledby="text-tab">
+                    <div class="section-container">
+                        <h3 class="section-header">Text Encryption</h3>
+                        <div class="section-content">
+                            <label for="textInput">Enter text:</label>
+                            <textarea id="textInput" class="form-control" rows="4"></textarea>
+
+                            <label for="cipherKey">Enter substitution key (at least 26 alphabet):</label>
+                            <input type="text" id="cipherKey" class="form-control" />
+
+                            <button type="button" onclick="encryptText()" class="btn btn-primary">Encrypt</button>
+                            <button type="button" onclick="decryptText()" class="btn btn-primary">Decrypt</button>
+
+                            <div class="result" style="margin-top: 10px;">
+                                <label for="resultText">Result:</label>
+                                <p id="resultText" class="result-text"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+                        
+                            <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+                            <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+                            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+                        
+                            <script>
+                                // Function to adjust transparency
+                                document.getElementById('transparencySlider').addEventListener('input', function() {
+                                    let transparency = this.value / 100; // Mengubah nilai slider menjadi skala 0-1
+                                    document.querySelectorAll('.section-container').forEach(function(section) {
+                                        section.style.backgroundColor = `rgba(249, 249, 249, ${transparency})`;
+                                    });
+                                });
+                        
+                                // Encryption and decryption functions
+                                function encryptText() {
+                                    let inputText = document.getElementById('textInput').value;
+                                    let cipherKey = document.getElementById('cipherKey').value;
+                                    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+                                    let encryptedText = "";
+                        
+                                    if (cipherKey.length < 5) {
+                                        alert("The key must be at least 5 characters long.");
+                return;
+            }
+
+            for (let i = 0; i < inputText.length; i++) {
+                let char = inputText[i].toLowerCase();
+                let index = alphabet.indexOf(char);
+                if (index !== -1) {
+                    encryptedText += cipherKey[index];
+                } else {
+                    encryptedText += inputText[i];
+                }
+            }
+
+            document.getElementById('resultText').innerText = "Encrypted text: " + encryptedText;
+        }
+
+        function decryptText() {
+            let inputText = document.getElementById('textInput').value;
+            let cipherKey = document.getElementById('cipherKey').value;
+            let alphabet = "abcdefghijklmnopqrstuvwxyz";
+            let decryptedText = "";
+
+            if (cipherKey.length < 5) {
+                alert("The key must be at least 5 characters long.");
+                return;
+            }
+
+            for (let i = 0; i < inputText.length; i++) {
+                let char = inputText[i].toLowerCase();
+                let index = cipherKey.indexOf(char);
+                if (index !== -1) {
+                    decryptedText += alphabet[index];
+                } else {
+                    decryptedText += inputText[i];
+                }
+            }
+
+            document.getElementById('resultText').innerText = "Decrypted text: " + decryptedText;
+        }
+    </script>
+</body>
+</html>
